@@ -1,0 +1,354 @@
+.pdf-editor {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #f8f9fa;
+}
+
+.editor-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-bottom: 1px solid #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  flex-wrap: wrap;
+  gap: 20px;
+  min-height: 60px;
+}
+
+.toolbar-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.tool-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.tool-group-label {
+  color: white;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-right: 5px;
+}
+
+.tool-btn {
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #333;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  min-width: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.tool-btn:hover {
+  background-color: rgba(255, 255, 255, 1);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.tool-btn.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+}
+
+.tool-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.tool-btn.save-btn {
+  background-color: #28a745;
+  color: white;
+  border-color: #28a745;
+  font-weight: 600;
+}
+
+.tool-btn.save-btn:hover {
+  background-color: #218838;
+  border-color: #1e7e34;
+}
+
+.zoom-level {
+  font-weight: bold;
+  color: white;
+  min-width: 50px;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 4px 8px;
+  border-radius: 3px;
+}
+
+.page-info {
+  font-weight: bold;
+  color: white;
+  min-width: 80px;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 4px 8px;
+  border-radius: 3px;
+}
+
+.editor-content {
+  flex: 1;
+  overflow: auto;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.pdf-container {
+  position: relative;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  overflow: hidden;
+  cursor: default;
+}
+
+.pdf-container.editing {
+  cursor: crosshair;
+  border: 2px solid #007bff;
+}
+
+.pdf-container.select-mode {
+  cursor: pointer;
+}
+.pdf-container.text-mode {
+  cursor: text;
+}
+.pdf-container.react-pdf__Document {
+  display: flex;
+  justify-content: center;
+}
+
+.react-pdf__Page {
+  margin: 0;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.react-pdf__Page__canvas {
+  display: block;
+  margin: 0 auto;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: #666;
+  font-size: 16px;
+}
+
+.text-annotation {
+  position: absolute;
+  /* background-color: rgba(255, 255, 0, 0.3); */
+  padding: 2px 4px;
+  border-radius: 2px;
+  cursor: default;
+  user-select: none;
+  z-index: 10;
+  transition: all 0.2s ease;
+  outline: none;
+  white-space: pre-wrap;
+}
+
+.text-annotation.selected {
+  border: 1px dashed #007bff;
+  padding: 2px;
+  border-radius: 3px;
+}
+
+.text-annotation.editing {
+  background-color: rgba(255, 193, 7, 0.3);
+  border: 2px solid #ffc107;
+}
+
+.annotation-controls {
+  position: absolute;
+  top: -30px;
+  right: -10px;
+  display: flex;
+  gap: 5px;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 2px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.edit-btn, .delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 2px;
+  font-size: 12px;
+  transition: background-color 0.2s ease;
+}
+
+.edit-btn:hover {
+  background-color: #e3f2fd;
+}
+
+.delete-btn:hover {
+  background-color: #ffebee;
+}
+
+.text-input-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.text-input-container {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  min-width: 300px;
+}
+
+.text-input-container input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.text-input-container input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.text-input-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.text-input-actions button {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  background-color: white;
+  color: #333;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.text-input-actions button:first-child {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.text-input-actions button:first-child:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+.text-input-actions button:last-child:hover {
+  background-color: #f8f9fa;
+  border-color: #007bff;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .editor-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  
+  .toolbar-section {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .editor-content {
+    padding: 10px;
+  }
+  
+  .text-input-container {
+    margin: 20px;
+    min-width: auto;
+  }
+}
+
+/* Custom scrollbar */
+.editor-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.editor-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.editor-content::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.editor-content::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Debug Panel */
+.debug-panel {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  z-index: 1001;
+  max-width: 200px;
+}
+
+.debug-panel h4 {
+  margin: 0 0 5px 0;
+  font-size: 14px;
+}
+
+.debug-panel p {
+  margin: 2px 0;
+} 

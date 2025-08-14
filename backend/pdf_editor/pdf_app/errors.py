@@ -1,0 +1,5 @@
+SUCCESS = "successMSG"
+ERROR = "errorMSG"
+OPERATION_SUCCESS = "Operation successful"
+OPERATION_FAILED = "Operation failed"
+PDF_UPDATED_SUCCESSFULLY = "PDF updated successfully"
