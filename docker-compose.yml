@@ -1,0 +1,74 @@
+# version: '3.8'
+
+# services:
+#   backend:
+#     build:
+#       context: ./backend
+#       dockerfile: Dockerfile
+#     container_name: django_backend
+#     volumes:
+#       - ./backend:/app
+#     ports: 
+#       - "8000:8000"
+
+#     command: python manage.py runserver 0.0.0.0:8000
+#     depends_on:
+#       - frontend
+
+#   frontend:
+#     build:
+#       context: ./frontend
+#       dockerfile: Dockerfile
+#     container_name: react_frontend
+#     volumes:
+#       - ./frontend: /app
+#       - /app/node_modules
+#     ports:
+#       - "3000:80"
+
+#     command: "npm start"
+#     depends_on:
+#       - backend
+
+
+services:
+  # This service defines your Django backend application.
+  backend:
+    # Tells Docker to find the Dockerfile in the './backend' directory to build the image.
+    build:
+      context: ./backend/pdf_editor
+      dockerfile: Dockerfile
+    # Assigns a custom container name for easy identification.
+    container_name: django_backend
+    # Mounts your local 'backend' directory to '/app' inside the container.
+    # This enables real-time code changes (hot-reloading) for development.
+    volumes:
+      - ./backend/pdf_editor:/app
+    # Maps port 8000 on your host machine to port 8000 inside the container.
+    # This is how you'll access the backend from your host.
+    ports:
+      - "8000:8000"
+    # This command overrides the default CMD in the Dockerfile, which is useful for development.
+    # It ensures the Django development server is accessible from other containers (like the frontend).
+    command: python manage.py runserver 0.0.0.0:8000
+
+  # This service defines your React frontend application.
+  frontend:
+    # Tells Docker to find the Dockerfile in the './frontend' directory to build the image.
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    # Assigns a custom container name for easy identification.
+    container_name: react_frontend
+    # Corrected volumes section:
+    # We only need to mount the project directory itself. Docker will handle the node_modules
+    # installation inside the container, and this single line ensures your source code is live-reloaded.
+    volumes:
+      - ./frontend:/app
+    # Maps port 3000 on your host to port 80 (Nginx) inside the container.
+    # This is how you'll access the React app from your browser.
+    ports:
+      - "3000:80"
+    # The frontend needs to be able to talk to the backend.
+    depends_on:
+      - backend

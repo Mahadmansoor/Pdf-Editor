@@ -401,7 +401,7 @@ import axios from "axios";
 import "./PDFEditor.css";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
-const API_BASE_URL = "http://127.0.0.1:8000";
+const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 export default function PDFEditor({ pdf, onSave }) {
   const [selectedTool, setSelectedTool] = useState(null);
