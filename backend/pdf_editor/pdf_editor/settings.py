@@ -25,7 +25,16 @@ SECRET_KEY = "django-insecure-)lzc&fpbdhj%70j3^=ulzlnym%qsqg#^4fw)veq&6d)atqwn7)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
+
+
+# Celery Configuration
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
 
 
 # Application definition
@@ -79,7 +88,7 @@ WSGI_APPLICATION = "pdf_editor.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": 'db.sqlite3',
     }
 }
 

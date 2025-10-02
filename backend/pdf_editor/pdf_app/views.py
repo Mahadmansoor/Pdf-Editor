@@ -31,6 +31,7 @@ def pdf_document_list(request):
     elif request.method == "POST":
         try:
             print("inside post get pdf")
+            print('request is: ', request)
             serializer = PDFDocumentSerializer(
                 data=request.data, context={"request": request}
             )
@@ -83,29 +84,60 @@ def pdf_document_detail(request, pk):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def extract_text(request, pk):
     """
-    Extract text with positions for editing
+    Extract structured text data (blocks, lines, spans) for professional editing.
     """
     try:
         pdf_doc = get_object_or_404(PDFDocument, pk=pk)
         doc = fitz.open(pdf_doc.file.path)
-        text_content = []
+        
+        full_content = []
 
+        # Iterate through each page of the document
         for page_num, page in enumerate(doc):
-            words = page.get_text(
-                "words"
-            )  # list of tuples: (x0, y0, x1, y1, text, block_no, line_no, word_no)
-            word_list = [
-                {"text": w[4], "x": w[0], "y": w[1], "x2": w[2], "y2": w[3]}
-                for w in words
-            ]
-            text_content.append({"page": page_num + 1, "words": word_list})
+            # Use "dict" to get a structured dictionary of the page content
+            page_data = page.get_text("dict")
+            print('page data is: ', page_data)
+            page_blocks = []
+            # Iterate through the blocks (which represent paragraphs or columns)
+            for block in page_data.get("blocks", []):
+                # We only want to process text blocks (type 0)
+                if block['type'] == 0:
+                    block_lines = []
+                    # Iterate through the lines within the current block
+                    for line in block.get("lines", []):
+                        line_spans = []
+                        # A line is made of one or more spans with consistent styling
+                        for span in line.get("spans", []):
+                            # Append the detailed span information
+                            line_spans.append({
+                                "text": span['text'],
+                                "font": span['font'],
+                                "size": round(span['size'], 2),
+                                "color": span['color'],
+                                "bbox": [round(c, 2) for c in span['bbox']]
+                            })
+                        
+                        if line_spans:
+                           block_lines.append({
+                               "spans": line_spans,
+                               "bbox": [round(c, 2) for c in line['bbox']]
+                           })
+                    
+                    if block_lines:
+                        page_blocks.append({
+                            "lines": block_lines,
+                            "bbox": [round(c, 2) for c in block['bbox']]
+                        })
+
+            full_content.append({"page": page_num + 1, "blocks": page_blocks})
 
         return Response(
-            {"id": pdf_doc.id, "title": pdf_doc.title, "pages": text_content}
+            {"id": str(pdf_doc.id), "title": pdf_doc.title, "pages": full_content}
         )
 
     except Exception as e:

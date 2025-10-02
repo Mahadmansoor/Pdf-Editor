@@ -1,26 +1,42 @@
 
+# FROM python:3.10-slim
+
+# WORKDIR /app
+
+
+# COPY requirements.txt .
+
+
+# RUN pip install -r requirements.txt
+
+
+# COPY . .
+
+
+# EXPOSE 8000
+
+
+# CMD ["gunicorn", "--bind", "0.0.0.0:8000", "pdf_editor.wsgi:application"]
+
+
+# located at /PDF-EDITOR-MASTER/backend/Dockerfile
+
 FROM python:3.10-slim
 
-# Set the working directory inside the container. This is where all
-# subsequent commands will be executed.
+# Set environment variables for best practices
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
 WORKDIR /app
 
-# The following section is for efficient caching.
-# We copy only the requirements file first to install dependencies.
-# This layer will be cached unless requirements.txt changes.
-COPY requirements.txt .
-
-# Install Python dependencies. Using --no-cache-dir helps keep the image size small.
+# Copy only the requirements first to leverage Docker's cache
+COPY backend/pdf_editor/requirements.txt .
 RUN pip install -r requirements.txt
 
-# Copy the rest of the application source code into the container
-# This is a separate layer, so it won't trigger a re-install of dependencies
-# if only the code changes.
-COPY . .
+# Copy the rest of your backend application code
+COPY backend/pdf_editor/ .
 
-# Expose the port the application will run on. This is for documentation
-# and doesn't publish the port, but tells Docker what port is being used.
 EXPOSE 8000
 
-
+# This command should now work without any issues
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "pdf_editor.wsgi:application"]
