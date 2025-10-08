@@ -7,7 +7,7 @@ COPY . .
 RUN npm run build
 
 # Stage 2: Serve the application with Nginx
-FROM nginx:1.23-alpine
+FROM docker.io/library/nginx:1.23-alpine
 # Copy the built static files from the 'build' stage
 COPY --from=build /app/build /usr/share/nginx/html
 # Nginx will automatically serve the index.html file
