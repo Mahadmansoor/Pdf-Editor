@@ -120,6 +120,9 @@ export default function PDFEditor({ pdf, onSave }) {
     setSelectedAnnotation(annotation);
   };
 
+
+
+  
   const handleMouseMove = (e) => {
     if (!isDragging || !selectedAnnotation) return;
     const rect = pageContainerRef.current.getBoundingClientRect();

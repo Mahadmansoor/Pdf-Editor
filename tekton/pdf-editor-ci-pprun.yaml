@@ -1,0 +1,28 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: pdf-editor-ci-run-
+spec:
+  pipelineRef:
+    name: pdf-editor-ci-pp
+  serviceAccountName: tekton-pipeline-sa
+  workspaces:
+    - name: shared-workspace
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi
+    - name: docker-credentials
+      secret:
+        secretName: my-docker-hub-credentials
+        items:
+          - key: .dockerconfigjson
+            path: config.json
+  params:
+    - name: git-repo-url
+      value: https://github.com/Mahadmansoor/Pdf-Editor.git
+    - name: image-url
+      value: mahadmansoor750/pdf-editor-frontend

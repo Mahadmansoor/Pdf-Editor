@@ -1,0 +1,58 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: pdf-editor-ci-pp
+spec:
+  workspaces:
+    - name: shared-workspace
+    - name: docker-credentials
+  params:
+    - name: git-repo-url
+    - name: image-url # e.g., your-dockerhub-username/my-web-app
+
+  tasks:
+    - name: clone-code
+      taskRef: { name: git-clone }
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+      params:
+        - name: url
+          value: $(params.git-repo-url)
+
+
+    - name: install-and-test # <-- First new task
+      runAfter: [clone-code]
+      taskRef: { name: npm-install-and-test }
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+
+    - name: build-code # <-- Second new task
+      runAfter: [install-and-test]
+      taskRef: { name: npm-build }
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+
+    # - name: test-and-build
+    #   runAfter: [clone-code]
+    #   taskRef: { name: npm-test-and-build }
+    #   workspaces:
+    #     - name: source
+    #       workspace: shared-workspace
+
+    # ...
+    - name: build-and-push-image
+      runAfter: [build-code]
+      taskRef: { name: buildah }
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+        - name: dockerconfig
+          workspace: docker-credentials
+      params:
+        - name: IMAGE
+          value: "$(params.image-url):$(tasks.clone-code.results.commit)"
+        - name: CONTEXT
+          value: ./frontend

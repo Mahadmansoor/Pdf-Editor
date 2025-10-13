@@ -1,0 +1,52 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: npm-test-and-build
+spec:
+  workspaces:
+    - name: source
+      description: The workspace containing the source code.
+  steps:
+    - name: npm-install
+      image: node:18-alpine
+      workingDir: $(workspaces.source.path)/frontend # Runs inside the frontend folder
+      script: |
+        #!/bin/sh
+        npm install
+      resources:
+        requests:
+          memory: 2Gi
+          cpu: "1"
+        limits:
+          memory: 4Gi
+          cpu: "2"
+
+    - name: npm-test
+      image: node:18-alpine
+      workingDir: $(workspaces.source.path)/frontend # Runs inside the frontend folder
+      script: |
+        #!/bin/sh
+        npm test
+      resources:
+        requests:
+          memory: 2Gi
+          cpu: "1"
+        limits:
+          memory: 4Gi
+          cpu: "2"
+
+    - name: npm-build
+      image: node:18-alpine
+      workingDir: $(workspaces.source.path)/frontend # Runs inside the frontend folder
+      script: |
+        #!/bin/sh
+        echo "--- Starting the build step test ---"
+        sleep 15
+        echo "--- Build step test finished successfully ---"
+      resources:
+        requests:
+          memory: 2Gi
+          cpu: "1"
+        limits:
+          memory: 4Gi
+          cpu: "2"

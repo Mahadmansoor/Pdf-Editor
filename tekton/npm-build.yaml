@@ -1,0 +1,17 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: npm-build
+spec:
+  workspaces:
+    - name: source
+  steps:
+    - name: npm-build
+      image: node:18-alpine
+      workingDir: $(workspaces.source.path)/frontend
+      script: |
+        #!/bin/sh
+        npm run build
+      resources:
+        requests: { memory: 2Gi, cpu: "1" }
+        limits: { memory: 4Gi, cpu: "2" }
