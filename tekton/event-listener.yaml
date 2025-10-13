@@ -4,6 +4,9 @@ metadata:
   name: github-listener
 spec:
   serviceAccountName: tekton-pipeline-sa
+  resources:
+    kubernetesResource:
+      serviceType: NodePort
   triggers:
     - name: github-push-trigger
       bindings:
