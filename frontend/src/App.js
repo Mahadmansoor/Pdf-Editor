@@ -91,10 +91,6 @@ function App() {
 
 
 
-
-
-          
-
           <div className="content">
             {selectedPDF ? (
               <PDFEditor
