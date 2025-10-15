@@ -1,7 +1,7 @@
 apiVersion: triggers.tekton.dev/v1beta1
 kind: TriggerTemplate
 metadata:
-  name: pdf-editor-ci-pprun
+  name: web-app-pipeline-template
 spec:
   params:
     - name: git-repo-url
@@ -12,7 +12,7 @@ spec:
         generateName: web-app-ci-run-
       spec:
         pipelineRef:
-          name: web-app-ci-pipeline # Make sure this matches your pipeline's name
+          name: pdf-editor-ci-pp
         serviceAccountName: tekton-pipeline-sa
         workspaces:
           - name: shared-workspace
