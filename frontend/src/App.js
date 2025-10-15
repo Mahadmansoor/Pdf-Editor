@@ -88,7 +88,6 @@ function App() {
               loading={loading}
             />
           </div>
-
           <div className="content">
             {selectedPDF ? (
               <PDFEditor
