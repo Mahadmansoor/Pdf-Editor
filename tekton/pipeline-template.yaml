@@ -10,6 +10,7 @@ spec:
       kind: PipelineRun
       metadata:
         generateName: web-app-ci-run-
+        namespace: default
       spec:
         pipelineRef:
           name: pdf-editor-ci-pp
