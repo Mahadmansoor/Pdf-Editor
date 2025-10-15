@@ -3,12 +3,15 @@ kind: ClusterRole
 metadata:
   name: tekton-triggers-eventlistener-clusterrole
 rules:
+  # Permissions to read cluster-scoped and namespaced Trigger resources
   - apiGroups: ["triggers.tekton.dev"]
-    resources: ["clustertriggerbindings", "clusterinterceptors", "eventlisteners", "triggerbindings", "triggertemplates", "triggers"]
+    resources: ["clustertriggerbindings", "clusterinterceptors", "eventlisteners", "triggerbindings", "triggertemplates", "triggers", "interceptors"]
     verbs: ["get", "list", "watch"]
+  # Permission to create PipelineRuns
   - apiGroups: ["tekton.dev"]
     resources: ["pipelineruns"]
     verbs: ["create"]
+  # Permission to read referenced ConfigMaps and Secrets
   - apiGroups: [""]
     resources: ["configmaps", "secrets"]
     verbs: ["get", "list", "watch"]

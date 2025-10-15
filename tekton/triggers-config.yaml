@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-triggers
+  namespace: tekton-pipelines # This MUST be in the tekton-pipelines namespace
+data:
+  # This key tells the controller to stop verifying TLS for interceptors
+  interceptor-tls-verify: "false"
