@@ -11,6 +11,8 @@ spec:
   steps:
     - name: build
       image: quay.io/buildah/stable
+      securityContext:
+        privileged: true
       script: |
         #!/bin/sh
         buildah bud -t $(params.image-url) $(workspaces.source.path)/$(params.context)

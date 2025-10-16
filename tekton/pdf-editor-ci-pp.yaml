@@ -113,11 +113,11 @@ spec:
                 --mail-from "$FROM" \
                 --mail-rcpt "$TO" \
                 --upload-file <(echo -e "From: $FROM\nTo: $TO\nSubject: $SUBJECT\n\n$BODY") \
-                --user "$FROM:agpo mpfe mrqf hvun"
+                --user "$FROM:nyup fdal jukr uhba"
       params:
         - name: status
           value: "$(tasks.status)"
         - name: sender
-          value: "mahadmansoor667@gmail.com"
-        - name: recipient
           value: "mahadmansoor84@gmail.com"
+        - name: recipient
+          value: "mahadmansoor667@gmail.com"
