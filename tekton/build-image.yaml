@@ -1,0 +1,16 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: build-image
+spec:
+  workspaces:
+    - name: source
+  params:
+    - name: image-url
+    - name: context
+  steps:
+    - name: build
+      image: quay.io/buildah/stable
+      script: |
+        #!/bin/sh
+        buildah bud -t $(params.image-url) $(workspaces.source.path)/$(params.context)

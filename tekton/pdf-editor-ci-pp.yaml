@@ -20,39 +20,104 @@ spec:
         - name: url
           value: $(params.git-repo-url)
 
-
-    - name: install-and-test # <-- First new task
+    # First task
+    - name: install-and-test
       runAfter: [clone-code]
       taskRef: { name: npm-install-and-test }
       workspaces:
         - name: source
           workspace: shared-workspace
 
-    - name: build-code # <-- Second new task
+
+
+    # Second task
+    - name: build-code
       runAfter: [install-and-test]
       taskRef: { name: npm-build }
       workspaces:
         - name: source
           workspace: shared-workspace
 
-    # - name: test-and-build
-    #   runAfter: [clone-code]
-    #   taskRef: { name: npm-test-and-build }
+    # - name: build-and-push-image
+    #   runAfter: [build-code]
+    #   taskRef: { name: buildah }
     #   workspaces:
     #     - name: source
     #       workspace: shared-workspace
+    #     - name: dockerconfig
+    #       workspace: docker-credentials
+    #   params:
+    #     - name: IMAGE
+    #       value: "$(params.image-url):$(tasks.clone-code.results.commit)"
+    #     - name: CONTEXT
+    #       value: ./frontend
 
-    # ...
-    - name: build-and-push-image
+
+    - name: build-image
       runAfter: [build-code]
-      taskRef: { name: buildah }
+      taskRef:
+        name: build-image
       workspaces:
         - name: source
           workspace: shared-workspace
+      params:
+        - name: image-url
+          value: "$(params.image-url):$(tasks.clone-code.results.commit)"
+        - name: context
+          value: ./frontend
+      
+    - name: scan-image
+      runAfter: [build-image]
+      taskRef:
+        name: trivy-scan
+      params:
+        - name: image-url
+          value: "$(params.image-url):$(tasks.clone-code.results.commit)"
+    
+    - name: push-image
+      runAfter: [scan-image]
+      taskRef:
+        name: push-image
+      workspaces:
         - name: dockerconfig
           workspace: docker-credentials
       params:
-        - name: IMAGE
+        - name: image-url
           value: "$(params.image-url):$(tasks.clone-code.results.commit)"
-        - name: CONTEXT
-          value: ./frontend
+
+
+  finally:
+    - name: send-email-notification
+      taskSpec:
+        params:
+          - name: status
+            type: string
+          - name: sender
+            type: string
+          - name: recipient
+            type: string
+        steps:
+          - name: send-email
+            image: curlimages/curl:latest
+            script: |
+              #!/bin/sh
+              STATUS="$(params.status)"
+              FROM="$(params.sender)"
+              TO="$(params.recipient)"
+              SUBJECT="Tekton Pipeline - pdf-editor-ci-pp: $STATUS"
+              BODY="Hello,\n\nThe Tekton pipeline 'pdf-editor-ci-pp' has completed with status: $STATUS.\n\nRegards,\nTekton CI/CD"
+
+              echo "Sending email notification to $TO ..."
+              curl -s --url 'smtps://smtp.gmail.com:465' \
+                --ssl-reqd \
+                --mail-from "$FROM" \
+                --mail-rcpt "$TO" \
+                --upload-file <(echo -e "From: $FROM\nTo: $TO\nSubject: $SUBJECT\n\n$BODY") \
+                --user "$FROM:agpo mpfe mrqf hvun"
+      params:
+        - name: status
+          value: "$(tasks.status)"
+        - name: sender
+          value: "mahadmansoor667@gmail.com"
+        - name: recipient
+          value: "mahadmansoor84@gmail.com"
