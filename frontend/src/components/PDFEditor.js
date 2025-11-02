@@ -21,41 +21,43 @@ export default function PDFEditor({ pdf, onSave }) {
 
   // fetch extracted text
   useEffect(() => {
-  if (!pdf?.id) return;
-  axios
-    .get(`${API_BASE_URL}/pdf-documents/${pdf.id}/extract-text/`) // Assuming this is your new endpoint
-    .then((res) => {
-      console.log('API Response:', res.data.pages);
-      const extractedPages = {};
-      
-      // The new, correct way to process the data
-      res.data.pages.forEach((pageData) => {
-        extractedPages[pageData.page] = pageData.blocks.map((block, blockIdx) => ({
-          id: `${Date.now()}-block-${blockIdx}`,
-          type: 'block',
-          bbox: block.bbox,
-          lines: block.lines.map((line, lineIdx) => ({
-            id: `${Date.now()}-line-${lineIdx}`,
-            bbox: line.bbox,
-            spans: line.spans.map((span, spanIdx) => ({
-              id: `${Date.now()}-span-${spanIdx}`,
-              bbox: span.bbox,
-              text: span.text,
-              originalText: span.text,
-              font: span.font,
-              size: span.size,
-              color: span.color,
-            }))
-          }))
-        }));
+    if (!pdf?.id) return;
+    axios
+      .get(`${API_BASE_URL}/pdf-documents/${pdf.id}/extract-text/`) // Assuming this is your new endpoint
+      .then((res) => {
+        console.log("API Response:", res.data.pages);
+        const extractedPages = {};
+
+        // The new, correct way to process the data
+        res.data.pages.forEach((pageData) => {
+          extractedPages[pageData.page] = pageData.blocks.map(
+            (block, blockIdx) => ({
+              id: `${Date.now()}-block-${blockIdx}`,
+              type: "block",
+              bbox: block.bbox,
+              lines: block.lines.map((line, lineIdx) => ({
+                id: `${Date.now()}-line-${lineIdx}`,
+                bbox: line.bbox,
+                spans: line.spans.map((span, spanIdx) => ({
+                  id: `${Date.now()}-span-${spanIdx}`,
+                  bbox: span.bbox,
+                  text: span.text,
+                  originalText: span.text,
+                  font: span.font,
+                  size: span.size,
+                  color: span.color,
+                })),
+              })),
+            })
+          );
+        });
+        setAnnotations(extractedPages);
+      })
+      .catch((e) => {
+        console.error("Text extraction failed:", e);
+        setAnnotations({});
       });
-      setAnnotations(extractedPages);
-    })
-    .catch((e) => {
-      console.error("Text extraction failed:", e);
-      setAnnotations({});
-    });
-}, [pdf?.id]);
+  }, [pdf?.id]);
 
   const onDocumentLoadSuccess = ({ numPages }) => {
     setNumPages(numPages);
@@ -210,58 +212,76 @@ export default function PDFEditor({ pdf, onSave }) {
   };
 
   const toHexColor = (c) => {
-  if (c === undefined) return '#000000';
-  return '#' + ('000000' + c.toString(16)).slice(-6);
-};
+    if (c === undefined) return "#000000";
+    return "#" + ("000000" + c.toString(16)).slice(-6);
+  };
 
-const renderAnnotations = () => {
-  const pageBlocks = annotations[pageNumber] || [];
-  
-  return pageBlocks.map((block) => {
-    const left = block.bbox[0] * scale;
-    const top = block.bbox[1] * scale;
-    const width = (block.bbox[2] - block.bbox[0]) * scale;
-    const height = (block.bbox[3] - block.bbox[1]) * scale;
-    
-    // Each block is a single contentEditable div
-    return (
-      <div
-        key={block.id}
-        contentEditable
-        suppressContentEditableWarning
-        className="editable-block" // A new CSS class for blocks
-        style={{
-          position: 'absolute',
-          left: `${left}px`,
-          top: `${top}px`,
-          width: `${width}px`,
-          height: `${height}px`,
-          border: '1px solid rgba(255, 0, 0, 0.4)', // Red border for debugging
-          zIndex: 20,
-        }}
-        // You will need to add event handlers here for saving, etc.
-      >
-        {block.lines.map(line => (
-          <p key={line.id} style={{ margin: 0, padding: 0 }}>
-            {line.spans.map(span => (
-              <span
-                key={span.id}
-                style={{
-                  fontFamily: `"${span.font}", sans-serif`,
-                  fontSize: `${span.size * scale}px`,
-                  color: toHexColor(span.color),
-                  whiteSpace: 'pre', // Preserve whitespace within spans
-                }}
-              >
-                {span.text}
-              </span>
-            ))}
-          </p>
-        ))}
-      </div>
-    );
-  });
-};
+  const renderAnnotations = () => {
+    const pageBlocks = annotations[pageNumber] || [];
+
+    if (!pageBlocks || pageBlocks.length === 0) return null;
+
+    return pageBlocks.map((block) => {
+      // Safety check for block structure
+      if (!block || !block.bbox || !block.lines) return null;
+
+      const left = block.bbox[0] * scale;
+      const top = block.bbox[1] * scale;
+      const width = (block.bbox[2] - block.bbox[0]) * scale;
+      const height = (block.bbox[3] - block.bbox[1]) * scale;
+
+      // Flatten all spans into a single text string
+      const fullText = block.lines
+        .filter((line) => line && line.spans)
+        .map((line) =>
+          line.spans
+            .filter((span) => span && span.text)
+            .map((span) => span.text)
+            .join("")
+        )
+        .join(" ");
+
+      // Get the first span's styling for consistency
+      const firstLine = block.lines.find(
+        (line) => line && line.spans && line.spans.length > 0
+      );
+      const firstSpan = firstLine?.spans?.[0];
+      const fontFamily = firstSpan?.font || "Arial";
+      const fontSize = (firstSpan?.size || 12) * scale;
+      const color = firstSpan?.color || 0;
+
+      // Use a standard div with proper React keys instead of contentEditable
+      return (
+        <div
+          key={block.id}
+          className="editable-block"
+          style={{
+            position: "absolute",
+            left: `${left}px`,
+            top: `${top}px`,
+            width: `${width}px`,
+            minHeight: `${height}px`,
+            border: "1px solid rgba(255, 0, 0, 0.4)",
+            zIndex: 20,
+            fontFamily: `"${fontFamily}", sans-serif`,
+            fontSize: `${fontSize}px`,
+            color: toHexColor(color),
+            whiteSpace: "pre-wrap",
+            wordWrap: "break-word",
+            overflowWrap: "break-word",
+            pointerEvents: "auto",
+            cursor: "pointer",
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            console.log("Block clicked:", block.id);
+          }}
+        >
+          {fullText}
+        </div>
+      );
+    });
+  };
 
   const handleContainerClick = (e) => {
     if (selectedAnnotation) {
@@ -355,18 +375,20 @@ const renderAnnotations = () => {
           </Document>
 
           {/* Editable overlay perfectly aligned */}
-          <div
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: pageDims.width,
-              height: pageDims.height,
-              pointerEvents: "none",
-            }}
-          >
-            {renderAnnotations()}
-          </div>
+          {pageDims.width > 0 && (
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: pageDims.width,
+                height: pageDims.height,
+                pointerEvents: "none",
+              }}
+            >
+              {renderAnnotations()}
+            </div>
+          )}
         </div>
       </div>
     </div>

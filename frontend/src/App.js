@@ -2,15 +2,16 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import PDFUpload from "./components/PDFUpload";
 import PDFList from "./components/PDFList";
-import PDFEditor from "./components/PDFEditor";
+import CanvasPDFEditor from "./components/CanvasPDFEditor";
 import "./App.css";
+import { ToastContainer, toast } from "react-toastify";
 
 function App() {
   const [pdfs, setPdfs] = useState([]);
   const [selectedPDF, setSelectedPDF] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const API_BASE_URL = process.env.REACT_APP_API_URL
+  const API_BASE_URL = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     fetchPDFs();
@@ -30,8 +31,10 @@ function App() {
 
   const handlePDFUpload = async (file) => {
     try {
+      console.log("inside handlePDFUpload");
       setLoading(true);
       const formData = new FormData();
+      console.log("form data is: ", formData);
       formData.append("file", file);
       formData.append("title", file.name);
 
@@ -44,13 +47,13 @@ function App() {
           },
         }
       );
-
+      console.log("response is: ", response);
+      const { document_id, task_id } = response.data;
       const pdfData = response.data.data || response.data;
-      setPdfs([pdfData, ...pdfs]);
-      setSelectedPDF(pdfData);
+      pollTaskStatus(task_id, document_id);
     } catch (error) {
       console.error("Error uploading PDF:", error);
-      alert("Error uploading PDF. Please try again.");
+      toast.error("Error uploading PDF. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -65,8 +68,40 @@ function App() {
       }
     } catch (error) {
       console.error("Error deleting PDF:", error);
-      alert("Error deleting PDF. Please try again.");
+      toast.error("Error deleting PDF. Please try again.");
     }
+  };
+
+  const pollTaskStatus = async (taskId, documentId) => {
+    const pollInterval = setInterval(async () => {
+      try {
+        const response = await axios.get(
+          `${API_BASE_URL}/pdf-documents/${taskId}/get_task_status/`
+        );
+        const { status } = response.data;
+        if (status === "SUCCESS") {
+          clearInterval(pollInterval);
+          console.log("before calling document id");
+          const pdfResponse = await axios.get(
+            `${API_BASE_URL}/pdf-documents/${documentId}/`
+          );
+          const pdfData = pdfResponse.data;
+          console.log("response of pdf data is: ", pdfData);
+          setPdfs([pdfData, ...pdfs]);
+          setSelectedPDF(pdfData);
+        } else if (status === "FAILURE") {
+          clearInterval(pollInterval);
+          console.error("Task Failed", response.data);
+          toast.error("PDF processing failed");
+        }
+      } catch (error) {
+        console.error("Error polling task");
+        clearInterval(pollInterval);
+      }
+    }, 2000);
+    setTimeout(() => {
+      clearInterval(pollInterval);
+    }, 300000);
   };
 
   return (
@@ -91,11 +126,12 @@ function App() {
 
           <div className="content">
             {selectedPDF ? (
-              <PDFEditor
+              <CanvasPDFEditor
                 pdf={selectedPDF}
                 onSave={(data) => {
                   console.log("PDF saved:", data);
-                  // You can update the PDF list here if needed
+                  // Refresh the PDF list to show updated files
+                  fetchPDFs();
                 }}
               />
             ) : (
@@ -107,6 +143,18 @@ function App() {
           </div>
         </div>
       </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </div>
   );
 }

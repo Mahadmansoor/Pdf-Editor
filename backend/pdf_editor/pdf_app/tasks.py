@@ -7,6 +7,7 @@ from . import errors
 @shared_task
 def analyze_pdf_task(doc_id):
     try:
+        print("inside analyze_pdf_task")
         pdf_doc = PDFDocument.objects.get(id=doc_id)
         doc=fitz.open(pdf_doc.file.path)
         analysis_data =[]
@@ -49,19 +50,10 @@ def analyze_pdf_task(doc_id):
             "title": pdf_doc.title, 
             "pages": analysis_data
         }
-        pdf_doc.analysis_status = 'Success'
+        pdf_doc.analysis_status = 'SUCCESS'
         pdf_doc.save()
-        return Response({
-            errors.SUCCESS: f'Analysis complete for document {pdf_doc.id}',
-            "id": str(pdf_doc.id), 
-            "title": pdf_doc.title, 
-            "pages": analysis_data
-        })
+        return f"Analysis complete for document {doc_id}"
     except PDFDocument.DoesNotExist:
-        return Response({
-            errors.ERROR: f'Error with document id {pdf_doc.id}'
-        })
+        return f"Error with document id {doc_id}"
     except Exception as e:
-        return Response({
-            errors.ERROR: str(e)
-        })
+        return str(e)

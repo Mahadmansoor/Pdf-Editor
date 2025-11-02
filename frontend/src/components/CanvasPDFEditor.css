@@ -1,0 +1,220 @@
+.canvas-pdf-editor {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
+}
+
+.toolbar-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tool-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.tool-btn:hover {
+  background-color: #f8f9fa;
+  border-color: #007bff;
+}
+
+.tool-btn.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.tool-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tool-btn:disabled:hover {
+  background-color: white;
+  border-color: #ddd;
+}
+
+.save-btn {
+  background-color: #28a745;
+  color: white;
+  border-color: #28a745;
+}
+
+.save-btn:hover {
+  background-color: #218838;
+  border-color: #1e7e34;
+}
+
+.page-info {
+  font-weight: 600;
+  min-width: 80px;
+  text-align: center;
+}
+
+.zoom-level {
+  font-weight: 600;
+  min-width: 50px;
+  text-align: center;
+}
+
+.canvas-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 2rem;
+  overflow: auto;
+  position: relative;
+}
+
+.fabric-canvas {
+  border: 1px solid #ddd;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background: white;
+  cursor: crosshair;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.loading-spinner {
+  padding: 1rem 2rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-weight: 600;
+  color: #007bff;
+}
+
+/* Fabric.js canvas customizations */
+.canvas-container .fabric-canvas {
+  cursor: default;
+}
+
+.canvas-container .fabric-canvas.text-mode {
+  cursor: text;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .editor-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  
+  .toolbar-section {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .canvas-container {
+    padding: 1rem;
+  }
+  
+  .fabric-canvas {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* Text editing enhancements */
+.fabric-canvas .canvas-container {
+  position: relative;
+}
+
+/* Custom text selection styles */
+.fabric-canvas .fabric-textbox {
+  outline: none;
+}
+
+/* Tooltip styles */
+.tool-btn[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  z-index: 1000;
+  margin-bottom: 0.25rem;
+}
+
+/* Animation for smooth transitions */
+.tool-btn, .fabric-canvas {
+  transition: all 0.2s ease;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .tool-btn {
+    border-width: 2px;
+  }
+  
+  .tool-btn.active {
+    border-width: 3px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .canvas-pdf-editor {
+    background-color: #1a1a1a;
+  }
+  
+  .editor-toolbar {
+    background: #2d2d2d;
+    border-bottom-color: #404040;
+  }
+  
+  .tool-btn {
+    background: #2d2d2d;
+    border-color: #404040;
+    color: #ffffff;
+  }
+  
+  .tool-btn:hover {
+    background-color: #404040;
+  }
+  
+  .fabric-canvas {
+    background: white; /* Keep canvas white for PDF visibility */
+  }
+}
