@@ -124,6 +124,7 @@ function App() {
             />
           </div>
 
+          
           <div className="content">
             {selectedPDF ? (
               <CanvasPDFEditor

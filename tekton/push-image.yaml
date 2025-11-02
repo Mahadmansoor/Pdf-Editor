@@ -1,0 +1,16 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: push-image
+spec:
+  workspaces:
+    - name: dockerconfig
+  params:
+    - name: image-url
+  steps:
+    - name: push
+      image: quay.io/buildah/stable
+      script: |
+        #!/bin/sh
+        echo "Pushing image $(params.image-url)..."
+        buildah push $(params.image-url)

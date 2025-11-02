@@ -1,0 +1,31 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: web-app-pipeline-template
+spec:
+  params:
+    - name: git-repo-url
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        generateName: web-app-ci-run-
+        namespace: default
+      spec:
+        pipelineRef:
+          name: pdf-editor-ci-pp
+        serviceAccountName: tekton-pipeline-sa
+        workspaces:
+          - name: shared-workspace
+            volumeClaimTemplate: { spec: { accessModes: [ReadWriteOnce], resources: { requests: { storage: 1Gi } } } }
+          - name: docker-credentials
+            secret: { secretName: my-docker-hub-credentials, items: [{ key: .dockerconfigjson, path: config.json }] }
+          - name: git-credentials
+            secret: { secretName: git-ssh-credentials }
+        params:
+          - name: git-repo-url
+            value: $(tt.params.git-repo-url) # From the binding
+          - name: image-url
+            value: "mahadmansoor750/pdf-editor-frontend" # Your image name
+          - name: config-repo-url
+            value: "git@github.com:Mahadmansoor/Pdf-Editor-Config.git" # Your config repo SSH URL
